@@ -1,13 +1,15 @@
 import graphene
 from .models import Activity
+from django.db import transaction
 from graphene_django.types import DjangoObjectType
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 class ActivityType(DjangoObjectType):
     class Meta:
         model = Activity
         interfaces = (graphene.relay.Node, )
         filter_fields = ['description', 'project', 'priority', 'status', 'creation_date', 'expected_completion_date']
-        fields = '__all__'
+        fields = '__all__' # sem campos sensíveis, utilizar todos
 
 class CreateActivity(graphene.Mutation):
     class Arguments:
@@ -22,9 +24,14 @@ class CreateActivity(graphene.Mutation):
     success = graphene.Boolean()
 
     def mutate(self, info, **kwargs):
-        activity = Activity(**kwargs)
-        activity.save()
-        return CreateActivity(activity=activity, success=True)
+        try: # criar atividade com tratamento de validação e erros
+            with transaction.atomic(): # transação atômica para garantir a integridade da manipulação no banco
+                activity = Activity(**kwargs)
+                activity.full_clean() # validar antes de salvar
+                activity.save()
+            return CreateActivity(activity=activity, success=True)
+        except ValidationError as e:
+            return CreateActivity(activity=None, success=False, errors=str(e))
 
 class UpdateActivity(graphene.Mutation):
     class Arguments:
@@ -40,11 +47,18 @@ class UpdateActivity(graphene.Mutation):
     success = graphene.Boolean()
 
     def mutate(self, info, id, **kwargs):
-        activity = Activity.objects.get(pk=id)
-        for key, value in kwargs.items():
-            setattr(activity, key, value)
-        activity.save()
-        return UpdateActivity(activity=activity, success=True)
+        try: # realizar update de atividade com tratamento de validação e erros
+            with transaction.atomic(): # transação atômica para garantir a integridade da manipulação no banco
+                activity = Activity.objects.get(pk=id)
+                for key, value in kwargs.items():
+                    setattr(activity, key, value) # atualizar apenas os campos fornecidos
+                activity.full_clean() # validar antes de salvar
+                activity.save()
+            return UpdateActivity(activity=activity, success=True)
+        except ObjectDoesNotExist:
+            return UpdateActivity(activity=None, success=False, errors="Activity not found.")
+        except ValidationError as e:
+            return UpdateActivity(activity=None, success=False, errors=str(e))
 
 class DeleteActivity(graphene.Mutation):
     class Arguments:
@@ -53,9 +67,13 @@ class DeleteActivity(graphene.Mutation):
     success = graphene.Boolean()
 
     def mutate(self, info, id):
-        activity = Activity.objects.get(pk=id)
-        activity.delete()
-        return DeleteActivity(success=True)
+        try: # deletar atividade com tratamento de validação e erros
+            with transaction.atomic(): # transação atômica para garantir a integridade da manipulação no banco
+                activity = Activity.objects.get(pk=id)
+                activity.delete()
+            return DeleteActivity(success=True)
+        except ObjectDoesNotExist:
+            return DeleteActivity(success=False, errors="Activity not found.")
 
 class Mutation(graphene.ObjectType):
     create_activity = CreateActivity.Field()

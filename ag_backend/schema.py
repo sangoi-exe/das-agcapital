@@ -6,13 +6,6 @@ from graphene_django.types import DjangoObjectType
 from django.contrib.auth import get_user_model
 
 ''' refatorando para schemas locais
-class DocumentType(DjangoObjectType):
-    class Meta:
-        model = Document
-        interfaces = (graphene.relay.Node, )
-        filter_fields = ['name', 'file', 'uploaded_at', 'project']
-        fields = '__all__'
-
 class NotificationType(DjangoObjectType):
     class Meta:
         model = Notification
