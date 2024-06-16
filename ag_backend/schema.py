@@ -6,14 +6,6 @@ from graphene_django.types import DjangoObjectType
 from django.contrib.auth import get_user_model
 
 ''' refatorando para schemas locais
-
-class ActivityType(DjangoObjectType):
-    class Meta:
-        model = Activity
-        interfaces = (graphene.relay.Node, )
-        filter_fields = ['description', 'project', 'priority', 'status', 'creation_date', 'expected_completion_date']
-        fields = '__all__'
-
 class DocumentType(DjangoObjectType):
     class Meta:
         model = Document
