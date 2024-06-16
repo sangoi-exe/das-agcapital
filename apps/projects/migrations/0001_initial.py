@@ -9,20 +9,48 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('cleitons', '0001_initial'),
+        ("cleitons", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Project',
+            name="Project",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('description', models.TextField()),
-                ('status', models.CharField(choices=[('open', 'Aberto'), ('in_progress', 'Em andamento'), ('completed', 'Concluído'), ('requires_attention', 'Requer Atenção'), ('on_hold', 'Em Espera')], default='open', max_length=20)),
-                ('start_date', models.DateField()),
-                ('estimated_end_date', models.DateField()),
-                ('cleiton', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='projects', to='cleitons.cleiton')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("open", "Aberto"),
+                            ("in_progress", "Em andamento"),
+                            ("completed", "Concluído"),
+                            ("requires_attention", "Requer Atenção"),
+                            ("on_hold", "Em Espera"),
+                        ],
+                        default="open",
+                        max_length=20,
+                    ),
+                ),
+                ("start_date", models.DateField()),
+                ("estimated_end_date", models.DateField()),
+                (
+                    "cleiton",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="projects",
+                        to="cleitons.cleiton",
+                    ),
+                ),
             ],
         ),
     ]
