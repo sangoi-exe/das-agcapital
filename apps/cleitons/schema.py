@@ -17,8 +17,8 @@ class CreateCleiton(graphene.Mutation):
     cleiton = graphene.Field(CleitonType)
     success = graphene.Boolean()
 
-    def mutate(self, info, name, email, phone, address):
-        cleiton = Cleiton(name=name, email=email, phone=phone, address=address)
+    def mutate(self, info, **kwargs):
+        cleiton = Cleiton(**kwargs)
         cleiton.save()
         return CreateCleiton(cleiton=cleiton, success=True)
 
@@ -33,16 +33,10 @@ class UpdateCleiton(graphene.Mutation):
     cleiton = graphene.Field(CleitonType)
     success = graphene.Boolean()
 
-    def mutate(self, info, id, name=None, email=None, phone=None, address=None):
+    def mutate(self, info, id, **kwargs):
         cleiton = Cleiton.objects.get(pk=id)
-        if name:
-            cleiton.name = name
-        if email:
-            cleiton.email = email
-        if phone:
-            cleiton.phone = phone
-        if address:
-            cleiton.address = address
+        for key, value in kwargs.items():
+            setattr(cleiton, key, value)
         cleiton.save()
         return UpdateCleiton(cleiton=cleiton, success=True)
 
