@@ -1,17 +1,19 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ValidationError
+
 
 class Event(models.Model):
     """
     Model to represent an event in the system's calendar. It includes fields for title, start and end times,
     description, and owner, with validation for start and end times.
     """
+
     title = models.CharField(max_length=255)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     description = models.TextField(blank=True, null=True)
-    owner = models.ForeignKey('accounts.CustomUser', related_name='events', on_delete=models.CASCADE)
+    owner = models.ForeignKey("accounts.CustomUser", related_name="events", on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title

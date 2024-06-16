@@ -1,52 +1,99 @@
 import graphene
-from apps.cleitons.schema import CleitonType, CreateCleiton, UpdateCleiton, DeleteCleiton
-from apps.accounts.schema import CustomUserType, CreateCustomUser, UpdateCustomUser, DeleteCustomUser
 from graphene_django.filter import DjangoFilterConnectionField
-from graphene_django.types import DjangoObjectType
-from django.contrib.auth import get_user_model
+from apps.accounts.schema import CreateAccounts, AccountsType, DeleteAccounts, UpdateAccounts
+from apps.accounts.models import Account
+from apps.activities.schema import ActivityType, CreateActivity, DeleteActivity, UpdateActivity
+from apps.activities.models import Activity
+from apps.cleitons.schema import CleitonType, CreateCleiton, DeleteCleiton, UpdateCleiton
+from apps.cleitons.models import Cleiton
+from apps.documents.schema import CreateDocument, DeleteDocument, DocumentType, UpdateDocument
+from apps.documents.models import Document
+from apps.notifications.schema import CreateNotification, DeleteNotification, NotificationType, UpdateNotification
+from apps.notifications.models import Notification
+from apps.projects.schema import CreateProject, DeleteProject, ProjectType, UpdateProject
+from apps.projects.models import Project
+from apps.reports.schema import CreateReport, DeleteReport, ReportType, UpdateReport
+from apps.reports.models import Report
+from apps.tasks.schema import CreateTask, DeleteTask, TaskType, UpdateTask
+from apps.tasks.models import Task
 
-''' refatorando para schemas locais
-class NotificationType(DjangoObjectType):
-    class Meta:
-        model = Notification
-        interfaces = (graphene.relay.Node, )
-        filter_fields = ['recipient', 'title', 'message', 'created_at', 'read', 'read_at']
-        fields = '__all__'
 
-class ProjectType(DjangoObjectType):
-    class Meta:
-        model = Project
-        interfaces = (graphene.relay.Node, )
-        filter_fields = ['name', 'description', 'cleiton', 'status', 'start_date', 'estimated_end_date']
-        fields = '__all__'
+class Query(graphene.ObjectType):
+    user = graphene.Field(AccountsType, id=graphene.ID(required=True))
+    client = graphene.Field(CleitonType, id=graphene.ID(required=True))
+    activity = graphene.Field(ActivityType, id=graphene.ID(required=True))
+    document = graphene.Field(DocumentType, id=graphene.ID(required=True))
+    notification = graphene.Field(NotificationType, id=graphene.ID(required=True))
+    project = graphene.Field(ProjectType, id=graphene.ID(required=True))
+    report = graphene.Field(ReportType, id=graphene.ID(required=True))
+    task = graphene.Field(TaskType, id=graphene.ID(required=True))
 
-class ReportType(DjangoObjectType):
-    class Meta:
-        model = Report
-        interfaces = (graphene.relay.Node, )
-        filter_fields = ['title', 'content', 'generated_at', 'project']
-        fields = '__all__'
-
-class TaskType(DjangoObjectType):
-    class Meta:
-        model = Task
-        interfaces = (graphene.relay.Node, )
-        filter_fields = ['title', 'description', 'due_date', 'completed', 'project', 'activity']
-        fields = '__all__'
-'''
-
-class Query(graphene.ObjectType):    
-    user = graphene.Field(CustomUserType, user_id=graphene.Int())
-    all_users = DjangoFilterConnectionField(CustomUserType)
     all_clients = DjangoFilterConnectionField(CleitonType)
+    all_users = DjangoFilterConnectionField(AccountsType)
+    all_activities = DjangoFilterConnectionField(ActivityType)
+    all_documents = DjangoFilterConnectionField(DocumentType)
+    all_notifications = DjangoFilterConnectionField(NotificationType)
+    all_projects = DjangoFilterConnectionField(ProjectType)
+    all_reports = DjangoFilterConnectionField(ReportType)
+    all_tasks = DjangoFilterConnectionField(TaskType)
+
+    def resolve_user(self, info, id):
+        return Account.objects.get(pk=id)
+
+    def resolve_client(self, info, id):
+        return Cleiton.objects.get(pk=id)
+
+    def resolve_activity(self, info, id):
+        return Activity.objects.get(pk=id)
+
+    def resolve_document(self, info, id):
+        return Document.objects.get(pk=id)
+
+    def resolve_notification(self, info, id):
+        return Notification.objects.get(pk=id)
+
+    def resolve_project(self, info, id):
+        return Project.objects.get(pk=id)
+
+    def resolve_report(self, info, id):
+        return Report.objects.get(pk=id)
+
+    def resolve_task(self, info, id):
+        return Task.objects.get(pk=id)
+
 
 class Mutation(graphene.ObjectType):
+    create_accounts_user = CreateAccounts.Field()
+    update_accounts_user = UpdateAccounts.Field()
+    delete_accounts_user = DeleteAccounts.Field()
+
+    create_activity = CreateActivity.Field()
+    update_activity = UpdateActivity.Field()
+    delete_activity = DeleteActivity.Field()
+
     create_cleiton = CreateCleiton.Field()
     update_cleiton = UpdateCleiton.Field()
     delete_cleiton = DeleteCleiton.Field()
-    
-    create_custom_user = CreateCustomUser.Field()
-    update_custom_user = UpdateCustomUser.Field()
-    delete_custom_user = DeleteCustomUser.Field()
+
+    create_document = CreateDocument.Field()
+    update_document = UpdateDocument.Field()
+    delete_document = DeleteDocument.Field()
+
+    create_notification = CreateNotification.Field()
+    update_notification = UpdateNotification.Field()
+    delete_notification = DeleteNotification.Field()
+
+    create_project = CreateProject.Field()
+    update_project = UpdateProject.Field()
+    delete_project = DeleteProject.Field()
+
+    create_report = CreateReport.Field()
+    update_report = UpdateReport.Field()
+    delete_report = DeleteReport.Field()
+
+    create_task = CreateTask.Field()
+    update_task = UpdateTask.Field()
+    delete_task = DeleteTask.Field()
+
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

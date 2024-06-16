@@ -9,20 +9,59 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('projects', '0001_initial'),
+        ("projects", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Activity',
+            name="Activity",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('description', models.TextField()),
-                ('priority', models.CharField(choices=[('high', 'Alta'), ('medium', 'Média'), ('low', 'Baixa')], default='medium', max_length=20)),
-                ('status', models.CharField(choices=[('pending', 'Pendente'), ('in_progress', 'Em andamento'), ('completed', 'Concluída'), ('requires_attention', 'Requer Atenção'), ('blocked', 'Bloqueada')], default='pending', max_length=20)),
-                ('creation_date', models.DateField(auto_now_add=True)),
-                ('expected_completion_date', models.DateField()),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activities', to='projects.project')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("description", models.TextField()),
+                (
+                    "priority",
+                    models.CharField(
+                        choices=[
+                            ("high", "Alta"),
+                            ("medium", "Média"),
+                            ("low", "Baixa"),
+                        ],
+                        default="medium",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pendente"),
+                            ("in_progress", "Em andamento"),
+                            ("completed", "Concluída"),
+                            ("requires_attention", "Requer Atenção"),
+                            ("blocked", "Bloqueada"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("creation_date", models.DateField(auto_now_add=True)),
+                ("expected_completion_date", models.DateField()),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="activities",
+                        to="projects.project",
+                    ),
+                ),
             ],
         ),
     ]
