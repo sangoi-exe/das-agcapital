@@ -1,6 +1,6 @@
-from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 from django.core.validators import RegexValidator
+from django.contrib.auth.models import AbstractUser, Group, Permission
 
 class CustomUser(AbstractUser):
     """
@@ -32,3 +32,5 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+
