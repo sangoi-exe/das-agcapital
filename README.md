@@ -18,3 +18,5 @@
 6. Rodar os testes `pytest -vvv` na pasta raiz do projeto. 
 7. Utilize `py manage.py runserver` para executar o servidor localmente. 
 
+## Diagrama de classes
+![diagrama_de_classes](https://github.com/DevArqSangoi/das-agcapital/assets/125471877/0942ff3c-7422-4491-ab5e-9fe93437b5da)
