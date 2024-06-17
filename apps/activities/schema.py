@@ -30,13 +30,10 @@ class CreateActivity(graphene.Mutation):
 
     def mutate(self, info, project_id, **kwargs):
         user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
-        print(f"User: {user}")
         project = Project.objects.get(pk=project_id)
-        print(f"Project: {project}")
 
-        if not (user.is_superuser or user.is_staff or project.cleiton.user == user):
+        if not (user.is_superuser or user.is_staff or project.cleiton.username == user.username):
             print("Permission denied.")
-            print(project.cleiton.user)
             return CreateActivity(activity=None, success=False, errors="Permission denied.")
 
         try:  # criar atividade com tratamento de validação e erros
@@ -71,7 +68,7 @@ class UpdateActivity(graphene.Mutation):
         user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         activity = Activity.objects.get(pk=id)
 
-        if not (user.is_superuser or user.is_staff or activity.project.cleiton.user == user):
+        if not (user.is_superuser or user.is_staff or activity.project.cleiton.username == user.username):
             return UpdateActivity(activity=None, success=False, errors="Permission denied.")
 
         try:  # update de atividade com tratamento de validação e erros
@@ -98,7 +95,7 @@ class DeleteActivity(graphene.Mutation):
         user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         activity = Activity.objects.get(pk=id)
 
-        if not (user.is_superuser or user.is_staff or activity.project.cleiton.user == user):
+        if not (user.is_superuser or user.is_staff or activity.project.cleiton.username == user.username):
             return DeleteActivity(success=False, errors="Permission denied.")
 
         try:  # deletar atividade com tratamento de validação e erros

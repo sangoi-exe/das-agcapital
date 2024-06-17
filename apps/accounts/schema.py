@@ -100,9 +100,6 @@ class DeleteAccounts(graphene.Mutation):
 
     def mutate(self, info, id):
         user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
-
-        print(f"Context user in mutate: {user}")
-
         if user.is_anonymous:
             return DeleteAccounts(success=False, errors="Authentication required")
 

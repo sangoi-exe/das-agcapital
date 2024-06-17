@@ -12,9 +12,13 @@ class Document(models.Model):
     """
 
     name = models.CharField(max_length=255)
-    file = models.FileField(upload_to="documents/")
+    project = models.ForeignKey(
+        "projects.Project",
+        on_delete=models.CASCADE,
+        related_name="documents",
+    )
+    file = models.CharField(max_length=255)  # simular o envio de um arquivo
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    project = models.ForeignKey("projects.Project", related_name="documents", on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name

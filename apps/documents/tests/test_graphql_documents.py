@@ -1,14 +1,14 @@
-from django.contrib.auth import get_user_model
-from django.test import TestCase, RequestFactory
 from graphene.test import Client
 from ag_backend.schema import schema
+from datetime import date, timedelta
 from apps.projects.models import Project
 from apps.cleitons.models import Cleiton
-from datetime import date, timedelta
-from apps.activities.models import Activity
+from apps.documents.models import Document
+from django.contrib.auth import get_user_model
+from django.test import TestCase, RequestFactory
 
 
-class ActivityGraphQLTestCase(TestCase):
+class DocumentGraphQLTestCase(TestCase):
     def setUp(self):
         super().setUp()
         self.user = get_user_model().objects.create_user(username="root", password="wasder")
@@ -25,25 +25,23 @@ class ActivityGraphQLTestCase(TestCase):
             start_date=date.today(),
             estimated_end_date=date.today() + timedelta(days=30),
         )
-        self.activity = Activity.objects.create(
-            description="Initial Activity",
+        self.document = Document.objects.create(
+            name="Project Document",
+            file="Document.pdf",
             project=self.project,
-            priority="medium",
-            status="pending",
-            creation_date=date.today(),
-            expected_completion_date=date.today() + timedelta(days=10),
+            uploaded_at=date.today(),
         )
         self.client = Client(schema)
         self.request = RequestFactory().get("/")
         self.request.user = self.user
 
-    def test_create_activity(self):
+    def test_create_document(self):
         create_query = f"""
             mutation {{
-                createActivity(description: "Test Activity", projectId: "{self.project.id}", priority: "high", status: "pending", creationDate: "{date.today()}", expectedCompletionDate: "{date.today() + timedelta(days=30)}") {{
-                    activity {{
-                        description
-                        priority
+                createDocument(name: "{self.document.name}", file: "{self.document.file}", projectId: "{self.project.id}", uploadedAt: "{date.today()}") {{
+                    document {{
+                        name
+                        file                        
                     }}
                     success
                 }}
@@ -53,15 +51,15 @@ class ActivityGraphQLTestCase(TestCase):
         print(response)
         if "errors" in response:
             print("Errors:", response["errors"])
-        assert response["data"]["createActivity"]["success"] is True, "Mutation should succeed"
+        assert response["data"]["createDocument"]["success"] is True, "Mutation should succeed"
 
-    def test_update_activity(self):
+    def test_update_document(self):
         update_query = f"""
             mutation {{
-                updateActivity(id: "{self.activity.id}", description: "Updated Activity", priority: "high") {{
-                    activity {{
-                        description
-                        priority
+                updateDocument(id: "{self.document.id}", name: "Updated Document", file: "Updated file") {{
+                    document {{
+                        name
+                        file                        
                     }}
                     success
                 }}
@@ -71,15 +69,15 @@ class ActivityGraphQLTestCase(TestCase):
         print(response)
         if "errors" in response:
             print("Errors:", response["errors"])
-        assert response["data"]["updateActivity"]["success"] is True, "Mutation should succeed"
-        self.activity.refresh_from_db()
-        assert self.activity.description == "Updated Activity", "Description should be updated"
-        assert self.activity.priority == "high", "Priority should be updated"
+        assert response["data"]["updateDocument"]["success"] is True, "Mutation should succeed"
+        self.document.refresh_from_db()
+        assert self.document.name == "Updated Document", "Description should be updated"
+        assert self.document.file == "Updated file", "Priority should be updated"
 
-    def test_delete_activity(self):
+    def test_delete_document(self):
         delete_query = f"""
             mutation {{
-                deleteActivity(id: "{self.activity.id}") {{
+                deleteDocument(id: "{self.document.id}") {{
                     success
                 }}
             }}
@@ -88,6 +86,6 @@ class ActivityGraphQLTestCase(TestCase):
         print(response)
         if "errors" in response:
             print("Errors:", response["errors"])
-        assert response["data"]["deleteActivity"]["success"] is True, "Mutation should succeed"
-        with self.assertRaises(Activity.DoesNotExist):
-            Activity.objects.get(pk=self.activity.id)
+        assert response["data"]["deleteDocument"]["success"] is True, "Mutation should succeed"
+        with self.assertRaises(Document.DoesNotExist):
+            Document.objects.get(pk=self.document.id)
