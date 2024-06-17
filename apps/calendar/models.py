@@ -13,7 +13,7 @@ class Event(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     description = models.TextField(blank=True, null=True)
-    owner = models.ForeignKey("accounts.CustomUser", related_name="events", on_delete=models.CASCADE)
+    owner = models.ForeignKey("accounts.Account", related_name="events", on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title

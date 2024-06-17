@@ -1,6 +1,6 @@
-from django.core.files.storage import FileSystemStorage
-from django.core.validators import RegexValidator
 from django.db import models
+from django.core.validators import RegexValidator
+from django.core.files.storage import FileSystemStorage
 
 from apps.projects.models import Project
 

@@ -10,14 +10,7 @@ class ActivityType(DjangoObjectType):
     class Meta:
         model = Activity
         interfaces = (graphene.relay.Node,)
-        filter_fields = [
-            "description",
-            "project",
-            "priority",
-            "status",
-            "creation_date",
-            "expected_completion_date",
-        ]
+        filter_fields = ["description", "project", "priority", "status", "creation_date", "expected_completion_date"]
         fields = "__all__"  # sem campos sensíveis, utilizar todos
 
 
