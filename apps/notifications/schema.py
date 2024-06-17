@@ -17,7 +17,7 @@ class NotificationType(DjangoObjectType):
         model = Notification
         interfaces = (graphene.relay.Node,)
         fields = "__all__"  # sem campos sensíveis, utilizar todos
-        filter_fields = []
+        filter_fields = ["cleiton_id", "project_id", "activity_id", "report_id", "task_id", "document_id"]
 
 
 class CreateNotification(graphene.Mutation):

@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     "apps.activities",
     "apps.calendar",
     "apps.cleitons",
-    "apps.communication",
     "apps.documents",
     "apps.notifications",
     "apps.projects",
@@ -64,6 +63,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "ag_backend.urls"

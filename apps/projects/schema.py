@@ -11,7 +11,7 @@ class ProjectType(DjangoObjectType):
     class Meta:
         model = Project
         interfaces = (graphene.relay.Node,)
-        filter_fields = ["name", "description", "cleiton", "status", "start_date", "estimated_end_date"]
+        filter_fields = ["name", "description", "cleiton_id", "status", "start_date", "estimated_end_date"]
         fields = "__all__"  # sem campos sensíveis, utilizar todos
 
 
