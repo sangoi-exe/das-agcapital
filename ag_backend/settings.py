@@ -66,6 +66,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
+
 ROOT_URLCONF = "ag_backend.urls"
 AUTH_USER_MODEL = "accounts.Account"
 
