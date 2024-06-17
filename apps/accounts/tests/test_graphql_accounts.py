@@ -1,28 +1,30 @@
 import pytest
-from django.contrib.auth import get_user_model
-from graphene.test import Client
+from graphene.test import Client as GraphQLClient
+from django.test import Client as DjangoClient
 from base64 import b64decode
-
 from ag_backend.schema import schema
 
 
-@pytest.fixture
-def user():
-    User = get_user_model()
-    return User.objects.create_user(username="testuser", email="test@example.com", password="securepassword")
+@pytest.mark.django_db
+def test_user_query(superuser):
+    client = GraphQLClient(schema)
+    executed = client.execute("""{ user(id: "%s") { username, email } }""" % superuser.id)
+    assert executed == {"data": {"user": {"username": "root", "email": "admin@example.com"}}}
 
 
 @pytest.mark.django_db
-def test_user_query(user):
-    client = Client(schema)
-    executed = client.execute("""{ user(id: "%s") { username, email } }""" % user.id)
-    assert executed == {"data": {"user": {"username": "testuser", "email": "test@example.com"}}}
+def test_create_update_delete_user(superuser, graphql_request):
+    django_client = DjangoClient()
+    logged_in = django_client.login(username="root", password="wasder")
+    assert logged_in, "Login failed"
 
+    response = django_client.get("/admin/")
+    print(f"/admin/ response status code: {response.status_code}")
 
-@pytest.mark.django_db
-def test_create_update_delete_user():
-    client = Client(schema)
-    # Create user
+    csrf_token = django_client.cookies["csrftoken"].value
+
+    graphql_client = GraphQLClient(schema)
+
     create_query = """
         mutation {
             createAccountsUser(username: "newuser", password: "wasder", email: "new@example.com") {
@@ -32,16 +34,17 @@ def test_create_update_delete_user():
                     email
                 }
                 success
+                errors
             }
         }
     """
-    create_executed = client.execute(create_query)
+    create_executed = graphql_client.execute(create_query, context_value=graphql_request)
+
     print("create:", create_executed)
-    assert create_executed["data"]["createAccountsUser"]["success"] is True
+    assert create_executed["data"]["createAccountsUser"]["success"] is True, create_executed["data"]["createAccountsUser"]["errors"]
     encoded_id = create_executed["data"]["createAccountsUser"]["accountsUser"]["id"]
     decoded_id = b64decode(encoded_id).decode("utf-8").split(":")[-1]
 
-    # Update user
     update_query = f"""
         mutation {{
             updateAccountsUser(id: "{decoded_id}", email: "updated@example.com") {{
@@ -50,22 +53,23 @@ def test_create_update_delete_user():
                     email
                 }}
                 success
+                errors
             }}
         }}
     """
-    update_executed = client.execute(update_query)
+    update_executed = graphql_client.execute(update_query, context_value=graphql_request)
     print("update:", update_executed)
-    assert update_executed["data"]["updateAccountsUser"]["success"] is True
+    assert update_executed["data"]["updateAccountsUser"]["success"] is True, update_executed["data"]["updateAccountsUser"]["errors"]
     assert update_executed["data"]["updateAccountsUser"]["accountsUser"]["email"] == "updated@example.com"
 
-    # Delete user
     delete_query = f"""
         mutation {{
             deleteAccountsUser(id: "{decoded_id}") {{
                 success
+                errors
             }}
         }}
     """
-    delete_executed = client.execute(delete_query)
+    delete_executed = graphql_client.execute(delete_query, context_value=graphql_request)
     print("delete:", delete_executed)
-    assert delete_executed["data"]["deleteAccountsUser"]["success"] is True
+    assert delete_executed["data"]["deleteAccountsUser"]["success"] is True, delete_executed["data"]["deleteAccountsUser"]["errors"]

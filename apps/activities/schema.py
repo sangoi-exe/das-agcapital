@@ -21,28 +21,36 @@ class CreateActivity(graphene.Mutation):
         project_id = graphene.ID(required=True)
         priority = graphene.String(required=True)
         status = graphene.String(required=True)
-        creation_date = graphene.String(required=True)
-        expected_completion_date = graphene.String(required=True)
+        creation_date = graphene.Date(required=True)
+        expected_completion_date = graphene.Date(required=True)
 
     activity = graphene.Field(ActivityType)
     success = graphene.Boolean()
+    errors = graphene.String()
 
     def mutate(self, info, project_id, **kwargs):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
+        print(f"User: {user}")
         project = Project.objects.get(pk=project_id)
+        print(f"Project: {project}")
 
         if not (user.is_superuser or user.is_staff or project.cleiton.user == user):
+            print("Permission denied.")
+            print(project.cleiton.user)
             return CreateActivity(activity=None, success=False, errors="Permission denied.")
 
         try:  # criar atividade com tratamento de validação e erros
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
+                print("Creating activity with:", kwargs)
                 activity = Activity(project=project, **kwargs)
                 activity.full_clean()  # validar antes de salvar
                 activity.save()
             return CreateActivity(activity=activity, success=True)
         except ValidationError as e:
+            print(f"ObjectDoesNotExist: {str(e)}")
             return CreateActivity(activity=None, success=False, errors=str(e))
         except Exception as e:
+            print(f"Unexpected error: {str(e)}")
             return CreateActivity(activity=None, success=False, errors="An unexpected error occurred")
 
 
@@ -57,9 +65,10 @@ class UpdateActivity(graphene.Mutation):
 
     activity = graphene.Field(ActivityType)
     success = graphene.Boolean()
+    errors = graphene.String()
 
     def mutate(self, info, id, **kwargs):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         activity = Activity.objects.get(pk=id)
 
         if not (user.is_superuser or user.is_staff or activity.project.cleiton.user == user):
@@ -83,9 +92,10 @@ class DeleteActivity(graphene.Mutation):
         id = graphene.ID(required=True)
 
     success = graphene.Boolean()
+    errors = graphene.String()
 
     def mutate(self, info, id):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         activity = Activity.objects.get(pk=id)
 
         if not (user.is_superuser or user.is_staff or activity.project.cleiton.user == user):

@@ -23,9 +23,10 @@ class CreateCleiton(graphene.Mutation):
 
     cleiton = graphene.Field(CleitonType)
     success = graphene.Boolean()
+    errors = graphene.String()
 
     def mutate(self, info, **kwargs):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         if not (user.is_superuser or user.is_staff):  # verificando nível de acesso
             return CreateCleiton(cleiton=None, success=False, errors="Permission denied.")
 
@@ -49,12 +50,14 @@ class UpdateCleiton(graphene.Mutation):
 
     cleiton = graphene.Field(CleitonType)
     success = graphene.Boolean()
+    errors = graphene.String()
 
     def mutate(self, info, id, **kwargs):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         try:  # update de cleiton com tratamento de validação e erros
             cleiton = Cleiton.objects.get(pk=id)
-            if not (user.is_superuser or user.is_staff or cleiton.user == user):  # verificando nível de acesso
+            # verificando nível de acesso
+            if not (user.is_superuser or user.is_staff or (cleiton.user and cleiton.user == user)):
                 return UpdateCleiton(cleiton=None, success=False, errors="Permission denied.")
 
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
@@ -74,9 +77,10 @@ class DeleteCleiton(graphene.Mutation):
         id = graphene.ID(required=True)
 
     success = graphene.Boolean()
+    errors = graphene.String()
 
     def mutate(self, info, id):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         if not (user.is_superuser or user.is_staff):
             return DeleteCleiton(success=False, errors="Permission denied.")
 

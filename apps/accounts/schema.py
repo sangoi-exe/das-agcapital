@@ -23,10 +23,17 @@ class CreateAccounts(graphene.Mutation):
 
     accounts_user = graphene.Field(AccountsType)
     success = graphene.Boolean()
+    errors = graphene.String()
 
     def mutate(self, info, **kwargs):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
+
+        if user.is_anonymous:
+            print("User is anonymous")
+            return CreateAccounts(accounts_user=None, success=False, errors="Authentication required")
+
         if not user.is_superuser:  # verificar se é su
+            print("User is not superuser")
             return CreateAccounts(accounts_user=None, success=False, errors="Permission denied.")
 
         try:  # criar account com tratamento de validação e erros
@@ -37,8 +44,10 @@ class CreateAccounts(graphene.Mutation):
                 accounts_user = Account(**kwargs)
                 accounts_user.full_clean()  # validar antes de salvar
                 accounts_user.save()
+                print("User created successfully")
             return CreateAccounts(accounts_user=accounts_user, success=True)
         except ValidationError as e:
+            print(f"Validation error: {e}")
             return CreateAccounts(accounts_user=None, success=False, errors=str(e))
         except Exception as e:
             return CreateAccounts(accounts_user=None, success=False, errors="An unexpected error occurred")
@@ -53,9 +62,14 @@ class UpdateAccounts(graphene.Mutation):
 
     accounts_user = graphene.Field(AccountsType)
     success = graphene.Boolean()
+    errors = graphene.String()
 
     def mutate(self, info, id, **kwargs):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
+
+        if user.is_anonymous:
+            return UpdateAccounts(accounts_user=None, success=False, errors="Authentication required")
+
         try:
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
                 accounts_user = Account.objects.get(pk=id)
@@ -82,9 +96,16 @@ class DeleteAccounts(graphene.Mutation):
         id = graphene.ID(required=True)
 
     success = graphene.Boolean()
+    errors = graphene.String()
 
     def mutate(self, info, id):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
+
+        print(f"Context user in mutate: {user}")
+
+        if user.is_anonymous:
+            return DeleteAccounts(success=False, errors="Authentication required")
+
         if not user.is_superuser:  # verificar se é su
             return DeleteAccounts(success=False, errors="Permission denied.")
 

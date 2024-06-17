@@ -29,7 +29,7 @@ class CreateProject(graphene.Mutation):
     errors = graphene.String()
 
     def mutate(self, info, **kwargs):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         if not user.is_authenticated:
             return CreateProject(project=None, success=False, errors="Authentication required.")
 
@@ -64,7 +64,7 @@ class UpdateProject(graphene.Mutation):
     errors = graphene.String()
 
     def mutate(self, info, id, **kwargs):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         if not user.is_authenticated:
             return UpdateProject(project=None, success=False, errors="Authentication required.")
 
@@ -93,7 +93,7 @@ class DeleteProject(graphene.Mutation):
     errors = graphene.String()
 
     def mutate(self, info, id):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         if not user.is_authenticated:
             return DeleteProject(success=False, errors="Authentication required.")
 
