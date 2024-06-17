@@ -45,22 +45,58 @@ class Query(graphene.ObjectType):
         return Cleiton.objects.get(pk=id)
 
     def resolve_activity(self, info, id):
-        return Activity.objects.get(pk=id)
+        user = info.context.user
+        activity = Activity.objects.filter(pk=id).select_related("project").first()
+        if not activity:
+            raise Exception("Atividade não encontrada.")
+
+        # verificar se é su, staff ou dono do projeto referente a atividade
+        if user.is_superuser or user.is_staff or activity.project.cleiton.user == user:
+            return activity
+        else:
+            raise Exception("Você não tem permissão para acessar esta atividade.")
 
     def resolve_document(self, info, id):
-        return Document.objects.get(pk=id)
+        user = info.context.user
+        document = Document.objects.filter(pk=id).select_related("project").first()
+        if not document:
+            raise Exception("Documento não encontrado.")
+
+        # verificar se é su, staff ou dono do projeto referente ao doc
+        if user.is_superuser or user.is_staff or document.project.cleiton.user == user:
+            return document
+        else:
+            raise Exception("Você não tem permissão para acessar este documento.")
 
     def resolve_notification(self, info, id):
         return Notification.objects.get(pk=id)
 
     def resolve_project(self, info, id):
-        return Project.objects.get(pk=id)
+        user = info.context.user
+        project = Project.objects.filter(pk=id).first()
+        if not project:
+            raise Exception("Projeto não encontrado.")
+
+        # verificar se é su, staff ou dono do projeto
+        if user.is_superuser or user.is_staff or project.cleiton.user == user:
+            return project
+        else:
+            raise Exception("Você não tem permissão para acessar este projeto.")
 
     def resolve_report(self, info, id):
         return Report.objects.get(pk=id)
 
     def resolve_task(self, info, id):
-        return Task.objects.get(pk=id)
+        user = info.context.user
+        task = Task.objects.filter(pk=id).select_related("project").first()
+        if not task:
+            raise Exception("Tarefa não encontrada.")
+
+        # verificar se é su, staff ou dono do projeto da referida task
+        if user.is_superuser or user.is_staff or task.project.cleiton.user == user:
+            return task
+        else:
+            raise Exception("Você não tem permissão para acessar esta tarefa.")
 
 
 class Mutation(graphene.ObjectType):

@@ -1,7 +1,4 @@
-from django.core.validators import RegexValidator
 from django.db import models
-
-from apps.cleitons.models import Cleiton
 
 
 class Project(models.Model):

@@ -1,8 +1,7 @@
-import django_filters
 import graphene
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from graphene_django.types import DjangoObjectType
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from .models import Cleiton
 
@@ -13,12 +12,6 @@ class CleitonType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = ["name", "email", "phone", "address"]
         fields = "__all__"
-
-
-class CleitonFilterSet(django_filters.FilterSet):
-    class Meta:
-        model = Cleiton
-        fields = ["name", "email", "phone", "address"]
 
 
 class CreateCleiton(graphene.Mutation):
@@ -32,6 +25,10 @@ class CreateCleiton(graphene.Mutation):
     success = graphene.Boolean()
 
     def mutate(self, info, **kwargs):
+        user = info.context.user
+        if not (user.is_superuser or user.is_staff):  # verificando nível de acesso
+            return CreateCleiton(cleiton=None, success=False, errors="Permission denied.")
+
         try:  # criar cleiton com tratamento de validação e erros
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
                 cleiton = Cleiton(**kwargs)
@@ -54,12 +51,16 @@ class UpdateCleiton(graphene.Mutation):
     success = graphene.Boolean()
 
     def mutate(self, info, id, **kwargs):
+        user = info.context.user
         try:  # update de cleiton com tratamento de validação e erros
+            cleiton = Cleiton.objects.get(pk=id)
+            if not (user.is_superuser or user.is_staff or cleiton.user == user):  # verificando nível de acesso
+                return UpdateCleiton(cleiton=None, success=False, errors="Permission denied.")
+
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
-                cleiton = Cleiton.objects.get(pk=id)
                 for key, value in kwargs.items():
-                    setattr(cleiton, key, value)  # Atualiza os campos do Cleiton.
-                cleiton.full_clean()  # Valida as alterações antes de salvar.
+                    setattr(cleiton, key, value)
+                cleiton.full_clean()  # validar antes de salvar
                 cleiton.save()
             return UpdateCleiton(cleiton=cleiton, success=True)
         except ObjectDoesNotExist:
@@ -75,6 +76,10 @@ class DeleteCleiton(graphene.Mutation):
     success = graphene.Boolean()
 
     def mutate(self, info, id):
+        user = info.context.user
+        if not (user.is_superuser or user.is_staff):
+            return DeleteCleiton(success=False, errors="Permission denied.")
+
         try:  # deletar cleiton com tratamento de validação e erros
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
                 cleiton = Cleiton.objects.get(pk=id)

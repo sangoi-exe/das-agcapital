@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+DEBUG = True
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-wfq!ck+^-%_%e!$n(_88l%*j3o4v(kjun$xfjshcld6wh=&lt_"
