@@ -5,6 +5,11 @@ from base64 import b64decode
 from ag_backend.schema import schema
 
 
+@pytest.fixture
+def graphql_client():
+    return GraphQLClient(schema)
+
+
 @pytest.mark.django_db
 def test_user_query(superuser):
     client = GraphQLClient(schema)

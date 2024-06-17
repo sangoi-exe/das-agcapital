@@ -7,7 +7,7 @@ class Cleiton(models.Model):
     Model to represent a client in the project management system.
     """
 
-    username = models.CharField(max_length=255)
+    username = models.CharField(max_length=255, unique=True, null=True)
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
