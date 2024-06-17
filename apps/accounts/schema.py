@@ -9,43 +9,43 @@ class AccountsType(DjangoObjectType):
     class Meta:
         model = Account
         interfaces = (graphene.relay.Node,)
-        filter_fields = ["id", "username", "email", "cpf", "phone_number"]
-        fields = ("id", "username", "email", "cpf", "phone_number")
+        fields = ["id", "username", "email"]
+        filter_fields = ["id", "username", "email"]
 
 
 class CreateAccounts(graphene.Mutation):
     class Arguments:
         username = graphene.String(required=True)
+        password = graphene.String(required=True)
         email = graphene.String(required=True)
-        cpf = graphene.String(required=True)
-        phone_number = graphene.String(required=True)
 
     accounts_user = graphene.Field(AccountsType)
     success = graphene.Boolean()
 
-    def mutate(self, info, username, email, cpf, phone_number):
+    def mutate(self, info, username, password, email):
         try:
             with transaction.atomic():
-                accounts_user = Account(username=username, email=email, cpf=cpf, phone_number=phone_number)
+                accounts_user = Account(username=username, password=password, email=email)
                 accounts_user.full_clean()
                 accounts_user.save()
             return CreateAccounts(accounts_user=accounts_user, success=True)
         except ValidationError as e:
             return CreateAccounts(accounts_user=None, success=False, errors=str(e))
+        except Exception as e:
+            return CreateAccounts(accounts_user=None, success=False, errors="An unexpected error occurred")
 
 
 class UpdateAccounts(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
         username = graphene.String()
+        password = graphene.String()
         email = graphene.String()
-        cpf = graphene.String()
-        phone_number = graphene.String()
 
     accounts_user = graphene.Field(AccountsType)
     success = graphene.Boolean()
 
-    def mutate(self, info, id, username=None, email=None, cpf=None, phone_number=None):
+    def mutate(self, info, id, username=None, email=None):
         try:
             with transaction.atomic():
                 accounts_user = Account.objects.get(pk=id)
@@ -53,10 +53,6 @@ class UpdateAccounts(graphene.Mutation):
                     accounts_user.username = username
                 if email:
                     accounts_user.email = email
-                if cpf:
-                    accounts_user.cpf = cpf
-                if phone_number:
-                    accounts_user.phone_number = phone_number
                 accounts_user.full_clean()
                 accounts_user.save()
             return UpdateAccounts(accounts_user=accounts_user, success=True)

@@ -1,3 +1,4 @@
+import django_filters
 import graphene
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
@@ -9,7 +10,15 @@ from .models import Cleiton
 class CleitonType(DjangoObjectType):
     class Meta:
         model = Cleiton
-        fields = "__all__"  # sem campos sensíveis, utilizar todos
+        interfaces = (graphene.relay.Node,)
+        filter_fields = ["name", "email", "phone", "address"]
+        fields = "__all__"
+
+
+class CleitonFilterSet(django_filters.FilterSet):
+    class Meta:
+        model = Cleiton
+        fields = ["name", "email", "phone", "address"]
 
 
 class CreateCleiton(graphene.Mutation):

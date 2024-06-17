@@ -10,18 +10,15 @@ class ReportType(DjangoObjectType):
     class Meta:
         model = Report
         interfaces = (graphene.relay.Node,)
-        filter_fields = ["title", "content", "generated_at", "report"]
+        filter_fields = ["title", "content", "generated_at"]
         fields = "__all__"  # sem campos sensíveis, utilizar todos
 
 
 class CreateReport(graphene.Mutation):
     class Arguments:
-        name = graphene.String()
-        description = graphene.String()
-        cleiton = graphene.String()
-        status = graphene.String()
-        start_date = graphene.String()
-        estimated_end_date = graphene.String()
+        title = graphene.String()
+        content = graphene.String()
+        generated_at = graphene.String()
 
     report = graphene.Field(ReportType)
     success = graphene.Boolean()
@@ -40,10 +37,9 @@ class CreateReport(graphene.Mutation):
 class UpdateReport(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        name = graphene.String()
-        file = graphene.String()
-        uploaded_at = graphene.String()
-        report = graphene.String()
+        title = graphene.String()
+        content = graphene.String()
+        generated_at = graphene.String()
 
     report = graphene.Field(ReportType)
     success = graphene.Boolean()

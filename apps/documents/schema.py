@@ -1,4 +1,5 @@
 import graphene
+import django_filters
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from graphene_django.types import DjangoObjectType
@@ -10,14 +11,13 @@ class DocumentType(DjangoObjectType):
     class Meta:
         model = Document
         interfaces = (graphene.relay.Node,)
-        filter_fields = ["name", "file", "uploaded_at", "project"]
+        filter_fields = ["name", "uploaded_at", "project"]
         fields = "__all__"  # sem campos sensíveis, utilizar todos
 
 
 class CreateDocument(graphene.Mutation):
     class Arguments:
         name = graphene.String()
-        file = graphene.String()
         uploaded_at = graphene.String()
         project = graphene.String()
 
@@ -39,7 +39,6 @@ class UpdateDocument(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
         name = graphene.String()
-        file = graphene.String()
         uploaded_at = graphene.String()
         project = graphene.String()
 

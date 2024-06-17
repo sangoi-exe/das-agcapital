@@ -1,21 +1,22 @@
 import graphene
 from graphene_django.filter import DjangoFilterConnectionField
-from apps.accounts.schema import CreateAccounts, AccountsType, DeleteAccounts, UpdateAccounts
+
 from apps.accounts.models import Account
-from apps.activities.schema import ActivityType, CreateActivity, DeleteActivity, UpdateActivity
+from apps.accounts.schema import AccountsType, CreateAccounts, DeleteAccounts, UpdateAccounts
 from apps.activities.models import Activity
-from apps.cleitons.schema import CleitonType, CreateCleiton, DeleteCleiton, UpdateCleiton
+from apps.activities.schema import ActivityType, CreateActivity, DeleteActivity, UpdateActivity
 from apps.cleitons.models import Cleiton
-from apps.documents.schema import CreateDocument, DeleteDocument, DocumentType, UpdateDocument
+from apps.cleitons.schema import CleitonType, CreateCleiton, DeleteCleiton, UpdateCleiton
 from apps.documents.models import Document
-from apps.notifications.schema import CreateNotification, DeleteNotification, NotificationType, UpdateNotification
+from apps.documents.schema import CreateDocument, DeleteDocument, DocumentType, UpdateDocument
 from apps.notifications.models import Notification
-from apps.projects.schema import CreateProject, DeleteProject, ProjectType, UpdateProject
+from apps.notifications.schema import CreateNotification, DeleteNotification, NotificationType, UpdateNotification
 from apps.projects.models import Project
-from apps.reports.schema import CreateReport, DeleteReport, ReportType, UpdateReport
+from apps.projects.schema import CreateProject, DeleteProject, ProjectType, UpdateProject
 from apps.reports.models import Report
-from apps.tasks.schema import CreateTask, DeleteTask, TaskType, UpdateTask
+from apps.reports.schema import CreateReport, DeleteReport, ReportType, UpdateReport
 from apps.tasks.models import Task
+from apps.tasks.schema import CreateTask, DeleteTask, TaskType, UpdateTask
 
 
 class Query(graphene.ObjectType):
