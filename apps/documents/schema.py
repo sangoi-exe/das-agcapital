@@ -1,8 +1,7 @@
 import graphene
-import django_filters
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from graphene_django.types import DjangoObjectType
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from .models import Document
 from apps.projects.models import Project
@@ -12,7 +11,7 @@ class DocumentType(DjangoObjectType):
     class Meta:
         model = Document
         interfaces = (graphene.relay.Node,)
-        filter_fields = ["name", "uploaded_at", "project"]
+        filter_fields = ["name", "uploaded_at", "project_id"]
         fields = "__all__"  # sem campos sensíveis, utilizar todos
 
 

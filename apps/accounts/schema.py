@@ -12,6 +12,7 @@ class AccountsType(DjangoObjectType):
         model = Account
         interfaces = (graphene.relay.Node,)
         fields = ["id", "username", "email"]
+        filter_fields = ["id", "username", "email"]
 
 
 class CreateAccounts(graphene.Mutation):

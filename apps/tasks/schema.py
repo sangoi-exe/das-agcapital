@@ -12,7 +12,7 @@ class TaskType(DjangoObjectType):
     class Meta:
         model = Task
         interfaces = (graphene.relay.Node,)
-        filter_fields = ["title", "description", "due_date", "completed", "project", "activity"]
+        filter_fields = ["title", "description", "due_date", "completed", "project_id", "activity_id"]
         fields = "__all__"  # sem campos sensíveis, utilizar todos
 
 
