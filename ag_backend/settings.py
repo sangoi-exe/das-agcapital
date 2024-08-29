@@ -94,10 +94,10 @@ WSGI_APPLICATION = "ag_backend.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "agbackend",
-        "USER": "agbackend_user",
-        "PASSWORD": "DzNH7XKtmWYMT9OlG3oTWIHMVUTsCSQw",
-        "HOST": "dpg-cpmifag8fa8c73aisk40-a.oregon-postgres.render.com",
+        "NAME": "testwaproject",
+        "USER": "testwaproject_user",
+        "PASSWORD": "487A9ZcNgCsc5wdRbugqRn17iZcXFqvU",
+        "HOST": "dpg-cr8e25lds78s73a0tmhg-a.oregon-postgres.render.com",
         "PORT": "5432",
     }
 }
