@@ -8,6 +8,7 @@
 - Os testes unitários realizam todas as funções CRUD.
 - O backend permite que apenas o SU crie contas e adicione cleitons.
 - O backend realiza verificações de autenticação para que apenas o dono do projeto, ou um SU ou staff, consiga realizar mudanças no seu respectivo projeto.
+- Normalmente eu usaria variáveis de ambiente, mas os dados de conexão ao banco de dados estão hardcoded por limitações da tier free do Render.com.
 
 ## Instruções para executar os testes e o servidor
 1. Clonar este repositório. 
