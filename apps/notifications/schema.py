@@ -36,7 +36,8 @@ class CreateNotification(graphene.Mutation):
     errors = graphene.String()
 
     def mutate(self, info, cleiton_id, title, message, **kwargs):
-        user = info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
+        print(user.id)
         if not user.is_authenticated:
             return CreateNotification(notification=None, success=False, errors="Authentication required.")
 
@@ -48,6 +49,7 @@ class CreateNotification(graphene.Mutation):
         try:  # criar notification com tratamento de validação e erros
             cleiton = Cleiton.objects.get(pk=cleiton_id)
             # verificar se o cleiton tem nível de acesso para criar a notificação, ou se é um SU/staff
+            print(cleiton.user.id)
             if cleiton.user != user and not (user.is_superuser or user.is_staff):
                 return CreateNotification(notification=None, success=False, errors="Permission denied. Not the author.")
 

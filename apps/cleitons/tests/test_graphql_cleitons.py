@@ -1,9 +1,6 @@
 from graphene.test import Client
 from ag_backend.schema import schema
-from datetime import date, timedelta
-from apps.projects.models import Project
 from apps.cleitons.models import Cleiton
-from apps.documents.models import Document
 from django.contrib.auth import get_user_model
 from django.test import TestCase, RequestFactory
 
