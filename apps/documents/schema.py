@@ -28,6 +28,8 @@ class CreateDocument(graphene.Mutation):
 
     def mutate(self, info, project_id, **kwargs):
         user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
+        if not user.is_authenticated:
+            return CreateDocument(document=None, success=False, errors="Authentication required.")
         project = Project.objects.get(pk=project_id)
 
         if not (user.is_superuser or user.is_staff or project.cleiton.username == user.username):
