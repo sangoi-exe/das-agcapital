@@ -8,10 +8,10 @@ from django.test import TestCase, RequestFactory
 class CleitonGraphQLTestCase(TestCase):
     def setUp(self):
         super().setUp()
-        self.user = get_user_model().objects.create_user(username="admin", password="securepassword", is_staff=True)
+        self.username = get_user_model().objects.create_user(username="admin", password="securepassword", is_staff=True)
         self.client = Client(schema)
         self.request = RequestFactory().get("/")
-        self.request.user = self.user
+        self.request.user = self.username
 
     def test_create_cleiton(self):
         create_query = """

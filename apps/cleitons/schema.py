@@ -16,7 +16,6 @@ class CleitonType(DjangoObjectType):
 
 class CreateCleiton(graphene.Mutation):
     class Arguments:
-        user = graphene.String()
         name = graphene.String()
         email = graphene.String()
         phone = graphene.String()
@@ -44,7 +43,6 @@ class CreateCleiton(graphene.Mutation):
 class UpdateCleiton(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        user = graphene.String()
         name = graphene.String()
         email = graphene.String()
         phone = graphene.String()

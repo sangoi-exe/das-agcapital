@@ -11,7 +11,7 @@ from django.test import TestCase, RequestFactory
 class DocumentGraphQLTestCase(TestCase):
     def setUp(self):
         super().setUp()
-        self.user = get_user_model().objects.create_user(username="root", password="wasder")
+        self.user = get_user_model().objects.create_user(username="cleiton", password="securepassword")
         self.cleiton = Cleiton.objects.create(
             username=self.user.username,
             name="Cleiton",

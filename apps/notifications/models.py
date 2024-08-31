@@ -1,8 +1,4 @@
 from django.db import models
-from django.core.validators import RegexValidator
-
-
-from apps.accounts.models import Account
 from apps.activities.models import Activity
 from apps.cleitons.models import Cleiton
 from apps.documents.models import Document

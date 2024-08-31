@@ -1,11 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-
-from .models import Account
-
-
-class AccountAdmin(UserAdmin):
-    model = Account
+from .models import DefaultAccount
 
 
-admin.site.register(Account, AccountAdmin)
+class DefaultAccountAdmin(UserAdmin):
+    model = DefaultAccount
+
+
+admin.site.register(DefaultAccount, DefaultAccountAdmin)

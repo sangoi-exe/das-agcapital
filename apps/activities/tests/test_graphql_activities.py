@@ -11,12 +11,14 @@ from apps.activities.models import Activity
 class ActivityGraphQLTestCase(TestCase):
     def setUp(self):
         super().setUp()
-        self.user = get_user_model().objects.create_user(username="root", password="wasder")
+        self.user = get_user_model().objects.create_user(username="cleiton", password="securepassword")
+        print(self.user)
         self.cleiton = Cleiton.objects.create(
-            username=self.user.username,
+            user=self.user,
             name="Cleiton",
-            email=f"{self.user.username}@example.com",
+            email=f"{self.user}@example.com",
         )
+        print(self.cleiton.user)
         self.project = Project.objects.create(
             name="Sample Project",
             description="Sample Project Description",
