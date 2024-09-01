@@ -30,11 +30,11 @@ class CreateUser(graphene.Mutation):
 
         if user.is_anonymous:
             print("User is anonymous.")
-            return CreateUser(default_account_user=None, success=False, errors="Authentication required")
+            return CreateUser(default_account_user=None, success=False, errors="Authentication required.")
 
         if not (user.is_superuser or user.is_staff):
             print("User does not have the necessary access level.")
-            return CreateUser(default_account_user=None, success=False, errors="Insufficient access level")
+            return CreateUser(default_account_user=None, success=False, errors="Access denied.")
 
         try:  # criar account com tratamento de validação e erros
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
@@ -51,11 +51,10 @@ class CreateUser(graphene.Mutation):
             return CreateUser(default_account_user=default_account_user, success=True)
 
         except ValidationError as e:
-            print(f"Validation error: {e}")
             return CreateUser(default_account_user=None, success=False, errors=str(e))
 
         except Exception as e:
-            return CreateUser(default_account_user=None, success=False, errors="An unexpected error occurred")
+            return CreateUser(default_account_user=None, success=False, errors="An unexpected error occurred.")
 
 
 class CreateStaff(graphene.Mutation):
@@ -74,11 +73,11 @@ class CreateStaff(graphene.Mutation):
 
         if user.is_anonymous:
             print("User is anonymous")
-            return CreateStaff(default_account_user=None, success=False, errors="Authentication required")
+            return CreateStaff(default_account_user=None, success=False, errors="Authentication required.")
 
         # Staff pode criar apenas usuários comuns, superuser pode criar qualquer tipo
         if not (user.is_superuser or (user.is_staff and not is_staff)):
-            return CreateStaff(user=None, success=False, errors="Permission denied")
+            return CreateStaff(default_account_user=None, success=False, errors="Access denied.")
 
         try:  # criar account com tratamento de validação e erros
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
@@ -88,13 +87,14 @@ class CreateStaff(graphene.Mutation):
                 default_account_user = DefaultAccount(**kwargs)
                 default_account_user.full_clean()  # validar antes de salvar
                 default_account_user.save()
-                print("User created successfully")
+                print("User created successfully.")
             return CreateStaff(default_account_user=default_account_user, success=True)
+
         except ValidationError as e:
-            print(f"Validation error: {e}")
             return CreateStaff(default_account_user=None, success=False, errors=str(e))
+
         except Exception as e:
-            return CreateStaff(default_account_user=None, success=False, errors="An unexpected error occurred")
+            return CreateStaff(default_account_user=None, success=False, errors="An unexpected error occurred.")
 
 
 class UpdateUser(graphene.Mutation):
@@ -124,7 +124,7 @@ class UpdateUser(graphene.Mutation):
                 default_account_user.is_staff = kwargs.pop("is_staff")
 
             elif user == default_account_user or user.is_staff:
-                return UpdateUser(default_account_user=None, success=False, errors="Insufficient permissions to change staff status.")
+                return UpdateUser(default_account_user=None, success=False, errors="Access denied.")
 
         try:
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
@@ -138,10 +138,15 @@ class UpdateUser(graphene.Mutation):
                 default_account_user.full_clean()  # validar antes de salvar
                 default_account_user.save()
                 return UpdateUser(default_account_user=default_account_user, success=True)
-        except ObjectDoesNotExist:
-            return UpdateUser(default_account_user=None, success=False, errors="Account not found.")
+
         except ValidationError as e:
             return UpdateUser(default_account_user=None, success=False, errors=str(e))
+
+        except ObjectDoesNotExist:
+            return UpdateUser(default_account_user=None, success=False, errors="Account not found.")
+
+        except Exception as e:
+            return UpdateUser(default_account_user=None, success=False, errors="An unexpected error occurred.")
 
 
 class DeleteUser(graphene.Mutation):
@@ -174,10 +179,15 @@ class DeleteUser(graphene.Mutation):
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
                 default_account_user.delete()
             return DeleteUser(success=True, errors=None)
-        except ObjectDoesNotExist:
-            return DeleteUser(default_account_user=None, success=False, errors="Account not found.")
+
         except ValidationError as e:
             return DeleteUser(default_account_user=None, success=False, errors=str(e))
+
+        except ObjectDoesNotExist:
+            return DeleteUser(default_account_user=None, success=False, errors="Account not found.")
+
+        except Exception as e:
+            return DeleteUser(default_account_user=None, success=False, errors="An unexpected error occurred.")
 
 
 class Mutation(graphene.ObjectType):
