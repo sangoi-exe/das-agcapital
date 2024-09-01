@@ -9,7 +9,9 @@ from .models import DefaultAccount
 class UserType(DjangoObjectType):
     class Meta:
         model = DefaultAccount
+        interfaces = (graphene.relay.Node,)
         fields = ["id", "username", "email", "is_staff"]
+        filter_fields = ["id", "username", "email", "is_staff"]
 
 
 class CreateUser(graphene.Mutation):
@@ -24,7 +26,7 @@ class CreateUser(graphene.Mutation):
     errors = graphene.String()
 
     def mutate(self, info, **kwargs):
-        user = info.context.get("username") if isinstance(info.context, dict) else info.context.user
+        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
 
         if user.is_anonymous:
             print("User is anonymous.")
@@ -54,72 +56,6 @@ class CreateUser(graphene.Mutation):
 
         except Exception as e:
             return CreateUser(default_account_user=None, success=False, errors="An unexpected error occurred")
-
-
-class UpdateUser(graphene.Mutation):
-    class Arguments:
-        id = graphene.ID(required=True)
-        username = graphene.String()
-        email = graphene.String()
-        password = graphene.String()  # habilitar mudança de senha
-
-    default_acount_user = graphene.Field(UserType)
-    success = graphene.Boolean()
-    errors = graphene.String()
-
-    def mutate(self, info, id, **kwargs):
-        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
-
-        if user.is_anonymous:
-            print("User is anonymous.")
-            return UpdateUser(default_acount_user=None, success=False, errors="Authentication required")
-
-        try:
-            with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
-                default_acount_user = DefaultAccount.objects.get(pk=id)
-                if default_acount_user != user and not (user.is_superuser or user.is_staff):  # verificar se é o próprio usuário, su ou staff
-                    print("User does not have the necessary access level.")
-                    return UpdateUser(default_acount_user=None, success=False, errors="Permission denied.")
-
-                for field, value in kwargs.items():
-                    if hasattr(default_acount_user, field):
-                        if field == "password":  # tratamento especial para a senha
-                            default_acount_user.set_password(value)
-                        else:
-                            setattr(default_acount_user, field, value)
-                default_acount_user.full_clean()  # validar antes de salvar
-                default_acount_user.save()
-                return UpdateUser(default_acount_user=default_acount_user, success=True)
-        except ObjectDoesNotExist:
-            return UpdateUser(default_acount_user=None, success=False, errors="Account not found.")
-        except ValidationError as e:
-            return UpdateUser(default_acount_user=None, success=False, errors=str(e))
-
-
-class DeleteUser(graphene.Mutation):
-    class Arguments:
-        id = graphene.ID(required=True)
-
-    success = graphene.Boolean()
-    errors = graphene.String()
-
-    def mutate(self, info, id):
-        user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
-
-        if user.is_anonymous:
-            print("User is anonymous.")
-            return DeleteUser(success=False, errors="Authentication required")
-
-        if not user.is_superuser:  # verificar se é su
-            return DeleteUser(success=False, errors="Permission denied.")
-
-        try:
-            with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
-                default_account_user = DefaultAccount.objects.get(pk=id)
-                default_account_user.delete()
-            return DeleteUser(success=True)
-        except ObjectDoesNotExist:
-            return DeleteUser(success=False, errors="Account not found.")
 
 
 class CreateStaff(graphene.Mutation):
@@ -161,12 +97,13 @@ class CreateStaff(graphene.Mutation):
             return CreateStaff(default_account_user=None, success=False, errors="An unexpected error occurred")
 
 
-class UpdateStaff(graphene.Mutation):
+class UpdateUser(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
         username = graphene.String()
         email = graphene.String()
         password = graphene.String()  # habilitar mudança de senha
+        is_staff = graphene.Boolean()  # habilitar mudança de nível
 
     default_account_user = graphene.Field(UserType)
     success = graphene.Boolean()
@@ -177,13 +114,20 @@ class UpdateStaff(graphene.Mutation):
 
         if user.is_anonymous:
             print("User is anonymous.")
-            return UpdateStaff(default_account_user=None, success=False, errors="Authentication required")
+            return UpdateUser(default_account_user=None, success=False, errors="Authentication required.")
+
+        default_account_user = DefaultAccount.objects.get(pk=id)
+
+        # verificar nível de acesso para mudar nível do usuário
+        if "is_staff" in kwargs:
+            if user.is_superuser:
+                default_account_user.is_staff = kwargs.pop("is_staff")
+
+            elif user == default_account_user or user.is_staff:
+                return UpdateUser(default_account_user=None, success=False, errors="Insufficient permissions to change staff status.")
 
         try:
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
-                default_account_user = DefaultAccount.objects.get(pk=id)
-                if default_account_user != user and not user.is_superuser:  # verificar se é o próprio usuário ou su
-                    return UpdateStaff(default_account_user=None, success=False, errors="Permission denied.")
 
                 for field, value in kwargs.items():
                     if hasattr(default_account_user, field):
@@ -193,14 +137,14 @@ class UpdateStaff(graphene.Mutation):
                             setattr(default_account_user, field, value)
                 default_account_user.full_clean()  # validar antes de salvar
                 default_account_user.save()
-                return UpdateStaff(default_account_user=default_account_user, success=True)
+                return UpdateUser(default_account_user=default_account_user, success=True)
         except ObjectDoesNotExist:
-            return UpdateStaff(default_account_user=None, success=False, errors="Account not found.")
+            return UpdateUser(default_account_user=None, success=False, errors="Account not found.")
         except ValidationError as e:
-            return UpdateStaff(default_account_user=None, success=False, errors=str(e))
+            return UpdateUser(default_account_user=None, success=False, errors=str(e))
 
 
-class DeleteStaff(graphene.Mutation):
+class DeleteUser(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
@@ -212,24 +156,32 @@ class DeleteStaff(graphene.Mutation):
 
         if user.is_anonymous:
             print("User is anonymous.")
-            return DeleteStaff(success=False, errors="Authentication required")
-
-        if not user.is_superuser:  # verificar se é su
-            return DeleteStaff(success=False, errors="Permission denied.")
+            return DeleteUser(success=False, errors="Authentication required")
 
         try:
+            default_account_user = DefaultAccount.objects.get(pk=id)
+
+            # verificar nível de acesso para deletar staff
+            if default_account_user.is_staff:
+                if not user.is_superuser:
+                    print("Insufficient permissions to delete a staff account.")
+                    return DeleteUser(success=False, errors="Insufficient permissions to delete a staff account.")
+            # verificar nível de acesso para deletar usuário comum
+            if not (user.is_superuser or user.is_staff):
+                print("Insufficient access level.")
+                return DeleteUser(success=False, errors="Permission denied.")
+
             with transaction.atomic():  # transação atômica para garantir a integridade da manipulação no banco
-                default_account_user = DefaultAccount.objects.get(pk=id)
                 default_account_user.delete()
-            return DeleteStaff(success=True)
+            return DeleteUser(success=True, errors=None)
         except ObjectDoesNotExist:
-            return DeleteStaff(success=False, errors="Account not found.")
+            return DeleteUser(default_account_user=None, success=False, errors="Account not found.")
+        except ValidationError as e:
+            return DeleteUser(default_account_user=None, success=False, errors=str(e))
 
 
 class Mutation(graphene.ObjectType):
+    create_staff = CreateStaff.Field()
     create_user = CreateUser.Field()
     update_user = UpdateUser.Field()
     delete_user = DeleteUser.Field()
-    create_staff = CreateStaff.Field()
-    update_staff = UpdateStaff.Field()
-    delete_staff = DeleteStaff.Field()

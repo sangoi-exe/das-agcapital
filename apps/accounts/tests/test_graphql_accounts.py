@@ -1,4 +1,4 @@
-
+import pytest
 from base64 import b64decode
 from ag_backend.schema import schema
 from django.contrib.auth import get_user_model
@@ -6,6 +6,7 @@ from graphene.test import Client as GraphQLClient
 from django.test import TestCase, RequestFactory, Client as DjangoClient
 
 
+@pytest.mark.django_db
 class UserQueryGraphQLTestCase(TestCase):
     def setUp(self):
         super().setUp()
@@ -40,8 +41,8 @@ class UserQueryGraphQLTestCase(TestCase):
     def test_create_user(self):
         create_query = """
             mutation {
-                createAccountsUser(username: "newuser", password: "wasder", email: "new@example.com") {
-                    accountsUser {
+                createUser(username: "newuser", password: "wasder", email: "new@example.com") {
+                    defaultAccountUser {
                         id
                         username
                         email
@@ -55,9 +56,9 @@ class UserQueryGraphQLTestCase(TestCase):
         print(response)
         if "errors" in response:
             print("Errors:", response["errors"])
-        assert response["data"]["createAccountsUser"]["success"] is True, "Mutation should succeed"
+        assert response["data"]["createUser"]["success"] is True, "Mutation should succeed"
 
-        encoded_id = response["data"]["createAccountsUser"]["accountsUser"]["id"]
+        encoded_id = response["data"]["createUser"]["defaultAccountUser"]["id"]
         decoded_id = b64decode(encoded_id).decode("utf-8").split(":")[-1]
 
         new_user = get_user_model().objects.get(pk=decoded_id)
@@ -68,8 +69,8 @@ class UserQueryGraphQLTestCase(TestCase):
         new_user = get_user_model().objects.create_user(username="newuser", password="wasder", email="new@example.com")
         update_query = f"""
             mutation {{
-                updateAccountsUser(id: "{new_user.id}", email: "updated@example.com") {{
-                    accountsUser {{
+                updateUser(id: "{new_user.id}", email: "updated@example.com") {{
+                    defaultAccountUser {{
                         username
                         email
                     }}
@@ -82,7 +83,7 @@ class UserQueryGraphQLTestCase(TestCase):
         print(response)
         if "errors" in response:
             print("Errors:", response["errors"])
-        assert response["data"]["updateAccountsUser"]["success"] is True, "Mutation should succeed"
+        assert response["data"]["updateUser"]["success"] is True, "Mutation should succeed"
         new_user.refresh_from_db()
         assert new_user.email == "updated@example.com", "Email should be updated to 'updated@example.com'"
 
@@ -90,7 +91,7 @@ class UserQueryGraphQLTestCase(TestCase):
         new_user = get_user_model().objects.create_user(username="newuser", password="wasder", email="new@example.com")
         delete_query = f"""
             mutation {{
-                deleteAccountsUser(id: "{new_user.id}") {{
+                deleteUser(id: "{new_user.id}") {{
                     success
                     errors
                 }}
@@ -100,6 +101,6 @@ class UserQueryGraphQLTestCase(TestCase):
         print(response)
         if "errors" in response:
             print("Errors:", response["errors"])
-        assert response["data"]["deleteAccountsUser"]["success"] is True, "Mutation should succeed"
+        assert response["data"]["deleteUser"]["success"] is True, "Mutation should succeed"
         with self.assertRaises(get_user_model().DoesNotExist):
             get_user_model().objects.get(pk=new_user.id)

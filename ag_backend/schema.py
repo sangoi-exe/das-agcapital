@@ -1,8 +1,8 @@
 import graphene
 from graphene_django.filter import DjangoFilterConnectionField
 
-from apps.accounts.models import Account
-from apps.accounts.schema import AccountsType, CreateAccounts, DeleteAccounts, UpdateAccounts
+from apps.accounts.models import DefaultAccount
+from apps.accounts.schema import UserType, CreateStaff, CreateUser, UpdateUser, DeleteUser
 from apps.activities.models import Activity
 from apps.activities.schema import ActivityType, CreateActivity, DeleteActivity, UpdateActivity
 from apps.cleitons.models import Cleiton
@@ -20,7 +20,7 @@ from apps.tasks.schema import CreateTask, DeleteTask, TaskType, UpdateTask
 
 
 class Query(graphene.ObjectType):
-    user = graphene.Field(AccountsType, id=graphene.ID(required=True))
+    user = graphene.Field(UserType, id=graphene.ID(required=True))
     client = graphene.Field(CleitonType, id=graphene.ID(required=True))
     activity = graphene.Field(ActivityType, id=graphene.ID(required=True))
     document = graphene.Field(DocumentType, id=graphene.ID(required=True))
@@ -29,8 +29,8 @@ class Query(graphene.ObjectType):
     report = graphene.Field(ReportType, id=graphene.ID(required=True))
     task = graphene.Field(TaskType, id=graphene.ID(required=True))
 
+    all_users = DjangoFilterConnectionField(UserType)
     all_clients = DjangoFilterConnectionField(CleitonType)
-    all_users = DjangoFilterConnectionField(AccountsType)
     all_activities = DjangoFilterConnectionField(ActivityType)
     all_documents = DjangoFilterConnectionField(DocumentType)
     all_notifications = DjangoFilterConnectionField(NotificationType)
@@ -39,7 +39,7 @@ class Query(graphene.ObjectType):
     all_tasks = DjangoFilterConnectionField(TaskType)
 
     def resolve_user(self, info, id):
-        return Account.objects.get(pk=id)
+        return DefaultAccount.objects.get(pk=id)
 
     def resolve_client(self, info, id):
         return Cleiton.objects.get(pk=id)
@@ -100,9 +100,10 @@ class Query(graphene.ObjectType):
 
 
 class Mutation(graphene.ObjectType):
-    create_accounts_user = CreateAccounts.Field()
-    update_accounts_user = UpdateAccounts.Field()
-    delete_accounts_user = DeleteAccounts.Field()
+    create_staff = CreateStaff.Field()
+    create_user = CreateUser.Field()
+    update_user = UpdateUser.Field()
+    delete_user = DeleteUser.Field()
 
     create_activity = CreateActivity.Field()
     update_activity = UpdateActivity.Field()

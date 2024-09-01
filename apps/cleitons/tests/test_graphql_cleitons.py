@@ -1,3 +1,4 @@
+import pytest
 from graphene.test import Client
 from ag_backend.schema import schema
 from apps.cleitons.models import Cleiton
@@ -5,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, RequestFactory
 
 
+@pytest.mark.django_db
 class CleitonGraphQLTestCase(TestCase):
     def setUp(self):
         super().setUp()
