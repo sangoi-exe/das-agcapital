@@ -1,9 +1,10 @@
 import pytest
+from base64 import b64decode
 from graphene.test import Client
 from ag_backend.schema import schema
-from apps.cleitons.models import Cleiton
 from django.contrib.auth import get_user_model
-from django.test import TestCase, RequestFactory
+from graphene.test import Client as GraphQLClient
+from django.test import TestCase, RequestFactory, Client as DjangoClient
 
 
 @pytest.mark.django_db
@@ -18,7 +19,7 @@ class CleitonGraphQLTestCase(TestCase):
     def test_create_cleiton(self):
         create_query = """
             mutation {
-                createCleiton(username: "cleiton_user", name: "Cleiton Silva", email: "cleiton@example.com", phone: "1234567890", address: "123 Baker Street") {
+                createCleiton(name: "Cleiton Silva", email: "cleiton@example.com", phone: "1234567890", address: "123 Baker Street") {
                     cleiton {
                         id
                         username
@@ -45,8 +46,7 @@ class CleitonGraphQLTestCase(TestCase):
         update_query = f"""
             mutation {{
                 updateCleiton(id: "{cleiton.id}", username: "updated_cleiton_user", name: "Updated Cleiton Silva", phone: "9876543210") {{
-                    cleiton {{
-                        username
+                    cleiton {{                        
                         name
                         phone
                     }}

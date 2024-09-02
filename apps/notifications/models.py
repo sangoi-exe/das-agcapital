@@ -1,6 +1,5 @@
 from django.db import models
 from apps.activities.models import Activity
-from apps.cleitons.models import Cleiton
 from apps.documents.models import Document
 from apps.projects.models import Project
 from apps.reports.models import Report
@@ -13,7 +12,7 @@ class Notification(models.Model):
     for creation and reading.
     """
 
-    cleiton = models.ForeignKey(Cleiton, on_delete=models.CASCADE, related_name="notifications")
+    #cleiton = models.ForeignKey(Cleiton, on_delete=models.CASCADE, related_name="notifications")
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, blank=True, related_name="notifications")
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, null=True, blank=True, related_name="notifications")
     report = models.ForeignKey(Report, on_delete=models.CASCADE, null=True, blank=True, related_name="notifications")

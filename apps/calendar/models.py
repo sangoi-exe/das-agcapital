@@ -8,7 +8,7 @@ class Event(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     description = models.TextField(blank=True, null=True)
-    cleiton = models.ForeignKey("cleitons.Cleiton", related_name="events", on_delete=models.CASCADE)
+    #cleiton = models.ForeignKey("cleitons.Cleiton", related_name="events", on_delete=models.CASCADE)
     activity = models.ForeignKey("activities.Activity", related_name="events", on_delete=models.CASCADE, null=True, blank=True)
     task = models.ForeignKey("tasks.Task", related_name="events", on_delete=models.CASCADE, null=True, blank=True)
 

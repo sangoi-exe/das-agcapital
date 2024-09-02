@@ -5,7 +5,6 @@ from django.db import transaction
 
 from .models import Event
 from apps.activities.models import Activity
-from apps.cleitons.models import Cleiton
 from apps.tasks.models import Task
 
 
@@ -19,7 +18,6 @@ class EventType(DjangoObjectType):
 
 class CreateEvent(graphene.Mutation):
     class Arguments:
-        cleiton_id = graphene.ID(required=True)
         title = graphene.String(required=True)
         start_time = graphene.DateTime(required=True)
         end_time = graphene.DateTime(required=True)
@@ -31,7 +29,7 @@ class CreateEvent(graphene.Mutation):
     success = graphene.Boolean()
     errors = graphene.String()
 
-    def mutate(self, info, cleiton_id, title, start_time, end_time, description=None, **kwargs):
+    def mutate(self, info, title, start_time, end_time, description=None, **kwargs):
         user = info.context.user
         if not user.is_authenticated:
             return CreateEvent(event=None, success=False, errors="Authentication required.")

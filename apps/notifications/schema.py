@@ -5,7 +5,6 @@ from graphene_django.types import DjangoObjectType
 
 from .models import Notification
 from apps.activities.models import Activity
-from apps.cleitons.models import Cleiton
 from apps.documents.models import Document
 from apps.projects.models import Project
 from apps.reports.models import Report
@@ -17,12 +16,11 @@ class NotificationType(DjangoObjectType):
         model = Notification
         interfaces = (graphene.relay.Node,)
         fields = "__all__"  # sem campos sensíveis, utilizar todos
-        filter_fields = ["cleiton_id", "project_id", "activity_id", "report_id", "task_id", "document_id"]
+        filter_fields = ["project_id", "activity_id", "report_id", "task_id", "document_id"]
 
 
 class CreateNotification(graphene.Mutation):
     class Arguments:
-        cleiton_id = graphene.ID(required=True)
         title = graphene.String(required=True)
         message = graphene.String(required=True)
         project_id = graphene.ID()
@@ -35,7 +33,7 @@ class CreateNotification(graphene.Mutation):
     success = graphene.Boolean()
     errors = graphene.String()
 
-    def mutate(self, info, cleiton_id, title, message, **kwargs):
+    def mutate(self, info, title, message, **kwargs):
         user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
         print(user.id)
         if not user.is_authenticated:

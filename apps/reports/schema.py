@@ -5,14 +5,13 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from .models import Report
 from apps.projects.models import Project
-from apps.cleitons.models import Cleiton
 
 
 class ReportType(DjangoObjectType):
     class Meta:
         model = Report
         interfaces = (graphene.relay.Node,)
-        filter_fields = ["cleiton", "title", "content", "project", "generated_at"]
+        filter_fields = ["title", "content", "project", "generated_at"]
         fields = "__all__"  # sem campos sensíveis, utilizar todos
 
 
@@ -53,7 +52,6 @@ class CreateReport(graphene.Mutation):
 class UpdateReport(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        cleiton_id = graphene.ID(required=True)
         title = graphene.String(required=True)
         content = graphene.String(required=True)
         project_id = graphene.ID(required=True)

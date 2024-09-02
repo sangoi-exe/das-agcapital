@@ -16,9 +16,9 @@ class Project(models.Model):
         ("on_hold", "Em Espera"),
     ]
 
+    owner = models.ForeignKey("accounts.DefaultAccount", on_delete=models.CASCADE, related_name="projects")
     name = models.CharField(max_length=255)
     description = models.TextField()
-    cleiton = models.ForeignKey("cleitons.Cleiton", on_delete=models.CASCADE, related_name="projects")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="open")
     start_date = models.DateField()
     estimated_end_date = models.DateField()

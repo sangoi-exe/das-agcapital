@@ -2,7 +2,6 @@ import graphene
 from django.db import transaction
 from graphene_django.types import DjangoObjectType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-
 from .models import Activity
 from apps.projects.models import Project
 
@@ -30,6 +29,7 @@ class CreateActivity(graphene.Mutation):
 
     def mutate(self, info, project_id, **kwargs):
         user = info.context.get("user") if isinstance(info.context, dict) else info.context.user
+        
         project = Project.objects.get(pk=project_id)
 
         if not (user.is_superuser or user.is_staff or project.cleiton.username == user.username):
@@ -43,11 +43,11 @@ class CreateActivity(graphene.Mutation):
                 activity.full_clean()  # validar antes de salvar
                 activity.save()
             return CreateActivity(activity=activity, success=True)
+        
         except ValidationError as e:
-            print(f"ObjectDoesNotExist: {str(e)}")
             return CreateActivity(activity=None, success=False, errors=str(e))
+        
         except Exception as e:
-            print(f"Unexpected error: {str(e)}")
             return CreateActivity(activity=None, success=False, errors="An unexpected error occurred")
 
 

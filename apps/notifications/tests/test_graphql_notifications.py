@@ -1,7 +1,6 @@
 from graphene.test import Client
 from datetime import date, timedelta
 from ag_backend.schema import schema
-from apps.cleitons.models import Cleiton
 from apps.projects.models import Project
 from apps.notifications.models import Notification
 from django.contrib.auth import get_user_model
