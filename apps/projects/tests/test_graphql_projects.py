@@ -1,4 +1,5 @@
 import pytest
+from apps.projects.models import Project
 from base64 import b64decode
 from ag_backend.schema import schema
 from django.contrib.auth import get_user_model
@@ -13,7 +14,7 @@ class ProjectGraphQLTestCase(TestCase):
         self.graphql_client = GraphQLClient(schema)
         self.request = RequestFactory().get("/")
         self.request.user = self.user
-        self.project_id = 0
+        self.project_id = None
 
     def test_create_project(self):
         create_project_query = """
@@ -30,18 +31,19 @@ class ProjectGraphQLTestCase(TestCase):
             }
         }
         """
-        response = self.graphql_client.execute(create_project_query, context_value={"user": self.user})        
+        response = self.graphql_client.execute(create_project_query, context_value={"user": self.user})
         if "errors" in response:
             print("Errors:", response["errors"])
-        assert response["data"]["createProject"]["success"] is True, "Should successfully create a project"
-
+        assert response["data"]["createProject"]["success"] is True, "Mutation should succeed"
+        print("--------------------------------------------------")
+        print(response["data"])
+        print("--------------------------------------------------")
         encoded_id = response["data"]["createProject"]["project"]["id"]
         decoded_id = b64decode(encoded_id).decode("utf-8").split(":")[-1]
 
         self.project_id = int(decoded_id)
-        print(self.project_id)
 
-    def test_update_project(self):
+
         update_project_query = f"""
         mutation {{
             updateProject(id: "{self.project_id}", name: "Updated Project") {{
@@ -56,10 +58,12 @@ class ProjectGraphQLTestCase(TestCase):
         response = self.graphql_client.execute(update_project_query, context_value={"user": self.user})
         if "errors" in response:
             print("Errors:", response["errors"])
+        print("--------------------------------------------------")
+        print(response["data"])
+        print("--------------------------------------------------")
         assert response["data"]["updateProject"]["success"] is True, "Should successfully update a project"
         assert response["data"]["updateProject"]["project"]["name"] == "Updated Project", "Project name should be updated"
 
-    def test_delete_project(self):
         delete_project_query = f"""
         mutation {{
             deleteProject(id: "{self.project_id}") {{
@@ -71,6 +75,9 @@ class ProjectGraphQLTestCase(TestCase):
         response = self.graphql_client.execute(delete_project_query, context_value={"user": self.user})
         if "errors" in response:
             print("Errors:", response["errors"])
+        print("--------------------------------------------------")
+        print(response["data"])
+        print("--------------------------------------------------")
         assert response["data"]["deleteProject"]["success"] is True, "Should successfully delete the project"
 
     def tearDown(self):
