@@ -1,10 +1,10 @@
 import graphene
-from django.db import transaction
-from graphene_django.types import DjangoObjectType
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-
 from .models import Project
 from apps.accounts.models import DefaultAccount
+
+from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from graphene_django.types import DjangoObjectType
 
 
 class ProjectType(DjangoObjectType):
@@ -34,12 +34,12 @@ class CreateProject(graphene.Mutation):
         if user.is_anonymous:
             return CreateProject(project=None, success=False, errors="Authentication required.")
 
+        if not (user.is_superuser or user.is_staff):
+            return CreateProject(project=None, success=False, errors="Permission denied.")
+
         try:  # criar project com tratamento de validação e erros
             owner = DefaultAccount.objects.get(username=kwargs.pop("owner").lower())
             owner_id = owner.id
-
-            if not (user.is_superuser or user.is_staff):
-                return CreateProject(project=None, success=False, errors="Permission denied.")
 
             with transaction.atomic():
                 project = Project(owner_id=owner_id, **kwargs)
@@ -77,7 +77,7 @@ class UpdateProject(graphene.Mutation):
         try:  # update de project com tratamento de validação e erros
             project = Project.objects.get(pk=id)
 
-            if not (user.id == project.owner or user.is_superuser or user.is_staff):
+            if not (user.id == project.owner_id or user.is_superuser or user.is_staff):
                 return UpdateProject(project=None, success=False, errors="Permission denied.")
 
             with transaction.atomic():  # utilizar transação atômica para garantir a integridade da manipulação no banco
@@ -124,7 +124,7 @@ class DeleteProject(graphene.Mutation):
             with transaction.atomic():  # utilizar transação atômica para garantir a integridade da manipulação no banco
                 project.delete()
             return DeleteProject(success=True)
-        
+
         except ObjectDoesNotExist:
             return DeleteProject(success=False, errors="Project not found.")
 

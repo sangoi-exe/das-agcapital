@@ -18,6 +18,7 @@ class Activity(models.Model):
     ]
 
     created_by = models.ForeignKey("accounts.DefaultAccount", on_delete=models.CASCADE, related_name="activities")
+    name = models.CharField(max_length=255)
     description = models.TextField()
     project = models.ForeignKey("projects.Project", on_delete=models.CASCADE, related_name="activities")
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default="medium")
